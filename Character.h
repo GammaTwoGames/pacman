@@ -9,6 +9,7 @@ protected:
     double y;
     int xi;
     int yi;
+    int test_228;
     int count;
     int mov;
     double vel;
