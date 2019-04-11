@@ -6,16 +6,18 @@ using namespace std;
 class Enemy : public Character
 {
 private:
+    //int ans[];
     bool looking();
     int pifagor(int p_xi, int p_yi, int dx, int dy);
     void move_left();
     void move_down();
     void move_right();
     void move_up();
+    bool move_simple(int dr);
     sf::Texture texture;
 public:
     Enemy();
-    int good_way(int p_xi, int p_yi);
+    int good_way(int p_xi, int p_yi, int n);
     void init(int _xi, int _yi);
     void draw(sf::RenderWindow* window);
     void move(int p_xi, int p_yi);
@@ -131,15 +133,64 @@ int Enemy::pifagor(int p_xi, int p_yi, int dx, int dy)
     return real_length - future_length;
 }
 
-int Enemy::good_way(int p_xi, int p_yi)
+int comp(const void *i, const void *j)
 {
-    int ans = 0;
+    return *(int*)i - *(int*)j;
+}
+
+int Enemy::good_way(int p_xi, int p_yi, int n)
+{
     int dl = - 1e6;
-    if (pifagor(p_xi, p_yi, 0, - 1) > dl) {ans = 1; dl = pifagor(p_xi, p_yi, 0, - 1);}
-    if (pifagor(p_xi, p_yi, 0,   1) > dl) {ans = 2; dl = pifagor(p_xi, p_yi, 0,   1);}
-    if (pifagor(p_xi, p_yi, 1,   0) > dl) {ans = 3; dl = pifagor(p_xi, p_yi, 1,   0);}
-    if (pifagor(p_xi, p_yi,-1,   0) > dl) {ans = 4; dl = pifagor(p_xi, p_yi,-1,   0);}
-    return ans;
+    int ans[4];
+    int pif[4];
+    pif[0] =  pifagor(p_xi, p_yi, 0, - 1);
+    pif[1] =  pifagor(p_xi, p_yi, 0,   1);
+    pif[2] =  pifagor(p_xi, p_yi, 1,   0);
+    pif[3] =  pifagor(p_xi, p_yi,-1,   0);
+
+    for (int i = 0; i < 4; i ++)
+         if (pif[i] > dl) {ans[0] = i + 1; dl = pif[i];}
+    dl = - 1e6;
+    for (int i = 0; i < 4; i ++)
+         if ((pif[i] > dl) && (i != ans[0] - 1)) {ans[1] = i + 1; dl = pif[i];}
+    dl = - 1e6;
+    for (int i = 0; i < 4; i ++)
+         if ((pif[i] > dl) && (i != ans[0] - 1) && (i != ans[1] - 1)) {ans[2] = i + 1; dl = pif[i];}
+    dl = - 1e6;
+    for (int i = 0; i < 4; i ++)
+         if ((pif[i] > dl) && (i != ans[0] - 1) && (i != ans[1] - 1) && (i != ans[2] - 1)) {ans[3] = i + 1; dl = pif[i];}
+    return ans[n];
+}
+
+bool Enemy::move_simple(int dr)
+{
+        bool ret = 0;
+        if((dr == 1) && (MAP[xi][yi - 1] != 1))
+        {
+            mov = 1;
+            move_up();
+            ret = 1;
+        }
+        if((dr == 2) && MAP[xi][yi + 1] != 1)
+        {
+            mov = 2;
+            move_down();
+            ret = 1;
+        }
+        if((dr == 3) && MAP[xi + 1][yi] != 1)
+        {
+            mov = 3;
+            move_right();
+            ret = 1;
+        }
+        if((dr == 4)  && MAP[xi - 1][yi] != 1)
+        {
+            mov = 4;
+            move_left();
+            ret = 1;
+        }
+    return ret;
+
 }
 
 void Enemy::move(int p_xi, int p_yi)
@@ -148,53 +199,13 @@ void Enemy::move(int p_xi, int p_yi)
     {
         if (looking() == 1)
         {
-            int gw = good_way(p_xi, p_yi);
-            cout<<"tuta"<<gw<<" "<<MAP[xi - 1][yi]<<endl;
-            if((gw == 1) && (MAP[xi][yi - 1] != 1))
-            {
-                mov = 1;
-                move_up();
-            }
-            if((gw == 2) && MAP[xi][yi + 1] != 1)
-            {
-                mov = 2;
-                move_down();
-            }
-            if((gw == 3) && MAP[xi + 1][yi] != 1)
-            {
-                mov = 3;
-                move_right();
-            }
-            if((gw == 4)  && MAP[xi - 1][yi] != 1)
-            {
-                mov = 4;
-                move_left();
-            }
-
-            if (mov > 10)
-            {
-                if(p_yi - yi < 0 && MAP[xi][yi - 1] != 1)
+            bool a228 = 0;
+            for (int i = 0; i < 4; i ++)
+                if (a228 == 0)
                 {
-                    mov = 1;
-                    move_up();
+                    int gw = good_way(p_xi, p_yi, i);
+                    a228 = move_simple(gw);
                 }
-                else if(p_yi - yi > 0 && MAP[xi][yi + 1] != 1)
-                {
-                    mov = 2;
-                    move_down();
-                }
-                else if(p_xi - xi > 0 && MAP[xi + 1][yi] != 1)
-                {
-                    mov = 3;
-                    move_right();
-                }
-                else if(p_xi - xi < 0 && MAP[xi - 1][yi] != 1)
-                {
-                    mov = 4;
-                    move_left();
-
-                }
-            }
         }
         else
         {
@@ -229,5 +240,3 @@ void Enemy::check_fail(double p_x, double p_y)
         fail = 1;
     }
 }
-
-#endif /* Enemy_h */
