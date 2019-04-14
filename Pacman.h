@@ -1,17 +1,20 @@
 #ifndef Pacman_h
 #define Pacman_h
 
+
+#include <SFML/Graphics.hpp>
+
 class Pacman : public Character
 {
 private:
     Dots* dots;
     sf::Texture texture[2];
-    void move_left();
-    void move_down();
-    void move_right();
-    void move_up();
+    void move_left(float time);
+    void move_down(float time);
+    void move_right(float time);
+    void move_up(float time);
     bool check_simple(int dr);
-    bool move_simple(int dr);
+    bool move_simple(int dr,float time);
     int next_mov = 0;
     bool looking();
 public:
@@ -21,7 +24,7 @@ public:
     int get_x();
     int get_y();
     void draw(sf::RenderWindow* window);
-    void move(int* move);
+    void move(int* move, float time);
 };
 
 Pacman::Pacman(Dots* _dots): dots(_dots)
@@ -64,86 +67,81 @@ void Pacman::draw(sf::RenderWindow* window)
     shape.setFillColor(sf::Color::Yellow);
     shape.setPosition(x, y);
     shape.setOrigin(r, r);
-    shape.setTexture(&texture[(count/40)%2]);
-    //if (mov = 1) shape.rotate(-90);
-    //if (mov = 2) shape.rotate(90);
-    //if (mov = 3) shape.rotate(0);
-    //if (mov = 4) shape.rotate(180);
+    shape.setTexture(&texture[((int)count/40)%2]);
+    if (mov == 1) shape.rotate(-90);
+    if (mov == 2) shape.rotate(90);
+    if (mov == 3) shape.rotate(0);
+    if (mov == 4) shape.rotate(180);
     window -> draw(shape);
 }
-void Pacman::move_left()
+
+void Pacman::move_left(float time)
 {
     if(count > 0)
     {
-        x -= vel;
-        --count;
+        x -= vel*time;
+        count -= time;
     }
     else
     {
         --xi;
         count = 100;
-        dots -> check(xi, yi);
+        x = X*xi + 20;
         //*move = 0;
     }
 
 }
-void Pacman::move_down()
+void Pacman::move_down(float time)
 {
     if(count > 0)
     {
-        y += vel;
-        --count;
+        y += vel*time;
+        count -= time;
     }
     else
     {
         ++yi;
         count = 100;
-        dots -> check(xi, yi);
+        y = yi*X + 20;
         //*move = 0;
     }
 
 }
-void Pacman::move_right()
+void Pacman::move_right(float time)
 {
     if(count > 0)
     {
-        x += vel;
-        --count;
+        x += vel*time;
+        count -= time;
     }
     else
     {
         ++xi;
         count = 100;
-        dots -> check(xi, yi);
+        x = xi*X + 20;
         //*move = 0;
     }
 
 }
-void Pacman::move_up()
+void Pacman::move_up(float time)
 {
     if(count > 0)
     {
-        y -= vel;
-        --count;
+        y -= vel*time;
+        count -= time;
     }
     else
     {
         --yi;
         count = 100;
-        dots -> check(xi, yi);
+        y = yi*X + 20;
         //*move = 0;
     }
 
 }
-
 bool Pacman::check_simple(int dr)
 {
         int xf = xi, yf = yi;
-        /*if (mov == 1) yf -= 1;
-        if (mov == 2) yf += 1;
-        if (mov == 3) xf += 1;
-        if (mov == 4) xf -= 1; */
-
         bool ret = 0;
         if((dr == 1) && (MAP[xf][yf - 1] != 1))
         {
@@ -164,35 +162,34 @@ bool Pacman::check_simple(int dr)
     return ret;
 }
 
-bool Pacman::move_simple(int dr)
+bool Pacman::move_simple(int dr, float time)
 {
         bool ret = 0;
         if((dr == 1) && (MAP[xi][yi - 1] != 1))
         {
             mov = 1;
-            move_up();
+            move_up(time);
             ret = 1;
         }
         if((dr == 2) && MAP[xi][yi + 1] != 1)
         {
             mov = 2;
-            move_down();
+            move_down(time);
             ret = 1;
         }
         if((dr == 3) && MAP[xi + 1][yi] != 1)
         {
             mov = 3;
-            move_right();
+            move_right(time);
             ret = 1;
         }
         if((dr == 4)  && MAP[xi - 1][yi] != 1)
         {
             mov = 4;
-            move_left();
+            move_left(time);
             ret = 1;
         }
     return ret;
-
 }
 
 bool Pacman::looking()
@@ -203,13 +200,12 @@ bool Pacman::looking()
     return rb;
 }
 
-void Pacman::move(int* move)
+void Pacman::move(int* move, float time)
 {
     next_mov = *move;
-    if ((check_simple(next_mov)) && ((count > 90) )) mov = next_mov;
-    bool a = move_simple(mov);
-
-
+    if ((check_simple(next_mov)) && ((count > 95) )) mov = next_mov;
+    bool a = move_simple(mov, time);
+    dots -> check(xi, yi);
 }
 
 #endif /* Pacman_h */
