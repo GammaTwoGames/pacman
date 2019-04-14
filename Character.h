@@ -1,6 +1,8 @@
 #ifndef Character_h
 #define Character_h
 
+#include <SFML/Graphics.hpp>
+
 class Character
 {
 protected:
@@ -9,11 +11,25 @@ protected:
     double y;
     int xi;
     int yi;
-    int count;
+    float count = 0;
     int mov;
     double vel;
+
 public:
     virtual void draw(sf::RenderWindow* window) = 0;
+    double get_x()
+    {
+        return x;
+    }
+    double get_xi()
+    {
+        return xi;
+    }
+    double get_yi()
+    {
+        return yi;
+    }
+
 };
 
 #endif /* Character_h */
