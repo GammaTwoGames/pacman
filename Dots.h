@@ -1,6 +1,9 @@
 #ifndef Dots_h
 #define Dots_h
 
+#include <SFML/Graphics.hpp>
+
+
 class Dots
 {
     int map[N][N];
@@ -36,6 +39,15 @@ void Dots::draw(sf::RenderWindow* window)
                 shape.setOrigin(4, 4);
                 window -> draw(shape);
             }
+            if(map[i][j] == 3)
+            {
+                sf::CircleShape shape;
+                shape.setRadius(10);
+                shape.setFillColor(sf::Color::Yellow);
+                shape.setPosition(X*i + X/2, X*j + X/2);
+                shape.setOrigin(10, 10);
+                window -> draw(shape);
+            }
         }
     }
 }
@@ -49,6 +61,12 @@ void Dots::check(int i, int j)
         {
             fail = -1;
         }
+        map[i][j] = 2;
+    }
+
+    if(map[i][j] == 3)
+    {
+        dis = 3;
         map[i][j] = 2;
     }
 }
